@@ -1,32 +1,24 @@
 module Main where
 
 import Control.Monad
+import Data.List (nub)
 
 type Room = Int
 data Dir  = L | R deriving (Show,Eq)
 
+allRooms :: Int -> [Room]
+allRooms n = [0..n-1]
+
 allPrincessStrategies :: Int -> Int -> [[Room]]
-allPrincessStrategies n k = replicateM k [0..n-1]
-
-allPrinceMoves :: Int -> [[Dir]]
-allPrinceMoves k = replicateM k [L,R]
-
-visitedRooms :: Int -> Room -> [Dir] -> [Room]
-visitedRooms n = scanl move
-    where
-    move m _ | m == 0   = 1
-    move m _ | m == n-1 = n-2
-    move m L            = m - 1
-    move m R            = m + 1
-
-allPrinceStrategies :: Int -> Int -> [[Room]]
-allPrinceStrategies n k = do
-    start <- [0..n-1]
-    moves <- allPrinceMoves (k-1)
-    return $ visitedRooms n start moves
+allPrincessStrategies n k = replicateM k (allRooms n)
 
 isWinningStrategy :: Int -> [Room] -> Bool
-isWinningStrategy n xs = all (or . zipWith (==) xs) $ allPrinceStrategies n (length xs)
+isWinningStrategy n xs = null $
+  foldr (\x -> nub . concatMap (evade x)) (allRooms n) xs
+  where
+    evade :: Room -> Room -> [Room]
+    evade princess prince =
+      filter (/= princess) . filter (\x -> 0<=x && x<n) $ [prince-1, prince+1]
 
 shortestWinningStrategies :: Int -> [[Room]]
 shortestWinningStrategies n = go 1
