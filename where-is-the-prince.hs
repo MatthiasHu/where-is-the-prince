@@ -39,6 +39,7 @@ dijkstra neighbs a b = map reverse $ go Set.empty (Map.singleton a [[]])
         newReached = Map.fromListWith (++) $ do
           (n, tss) <- Map.toList reached
           (t, n') <- neighbs n
+          guard $ n' `Set.notMember` out
           return (n', map (t:) tss)
 
 shortestWinningStrategies :: Int -> [[Room]]
